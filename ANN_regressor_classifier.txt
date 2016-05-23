@@ -1,0 +1,53 @@
+% Name:  Venkata Guru Sai Vemulakonda
+% ASU Email Address: vvemulak@asu.edu
+% Arizona State University CSE591
+% Description: Script to regress and classify based on the response time
+% Solve an Input-Output Fitting problem with a Neural Network
+A = xlsread('\Posts_FullFeaturesTrainFinal.xlsx');
+subset_A = genrandom(A);
+Norm_subset_A = Normalization(subset_A);
+X = Norm_subset_A(:,1:size(Norm_subset_A,2)-1);
+Y = Norm_subset_A(:, size(Norm_subset_A,2));
+x = X';
+t = Y';
+As = xlsread('\Posts_FullFeaturesTestFinal.xlsx');
+Norm_As = Normalization(As);
+xs = Norm_As(:,1:size(Norm_As,2)-1);
+% Choose a Training Function
+% For a list of all training functions type: help nntrain
+% 'trainlm' is usually fastest.
+% 'trainbr' takes longer but may be better for challenging problems.
+% 'trainscg' uses less memory. Suitable in low memory situations.
+trainFcn = 'trainlm';  % Levenberg-Marquardt backpropagation.
+
+% Create a Fitting Network
+hiddenLayerSize = 100;
+net = fitnet(hiddenLayerSize,trainFcn);
+%net.performFcn='msereg';
+%net.performParam.ratio=20;
+
+% Setup Division of Data for Training, Validation, Testing
+net.divideParam.trainRatio = 70/100;
+net.divideParam.valRatio = 30/100;
+%net.divideParam.testRatio = 15/100;
+
+% Train the Network
+[net,tr] = train(net,x,t);
+
+% Test the Network
+ys = net(xs);
+xlswrite('\output_of_regressor.xlsx', ys);
+%e = gsubtract(t,y);
+%performance = perform(net,t,y)
+
+% View the Network
+%view(net)
+
+% Plots
+% Uncomment these lines to enable various plots.
+%figure, plotperform(tr)
+%figure, plottrainstate(tr)
+%figure, ploterrhist(e)
+%figure, plotregression(t,y)
+%figure, plotfit(net,x,t)
+
